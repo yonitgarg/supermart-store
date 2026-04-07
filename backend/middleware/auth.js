@@ -1,17 +1,26 @@
 const jwt = require("jsonwebtoken");
 
-exports.verifyToken = (req, res, next) => {
-  const token = req.headers["authorization"];
-  if (!token) return res.sendStatus(403);
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
 
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) return res.sendStatus(403);
-    req.user = user;
+  if (!authHeader) {
+    return res.status(401).json("No token provided");
+  }
+
+  // 🔥 TOKEN EXTRACT
+  const token = authHeader.split(" ")[1];
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+
+    console.log("DECODED USER:", decoded); // debug
+
+    req.user = decoded;
     next();
-  });
+  } catch (err) {
+    console.log("VERIFY ERROR:", err);
+    return res.status(403).json("Invalid token");
+  }
 };
 
-exports.isAdmin = (req, res, next) => {
-  if (req.user.role !== "admin") return res.sendStatus(403);
-  next();
-};
+module.exports = { verifyToken };

@@ -13,8 +13,7 @@ router.get("/", async (req, res) => {
 });
 
 // 🔐 ADD product (ONLY ADMIN)
-router.post("/", verifyToken, isAdmin, async (req, res) => {
-  try {
+router.post("/", async (req, res) => {  try {
     const product = new Product(req.body);
     const saved = await product.save();
     res.json(saved);

@@ -1,29 +1,30 @@
-const User = require("../models/User");
-const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-
-exports.register = async (req, res) => {
-  const { name, email, password } = req.body;
-
-  const hashed = await bcrypt.hash(password, 10);
-
-  const user = new User({ name, email, password: hashed });
-  await user.save();
-
-  res.json({ message: "User Registered" });
-};
-
 exports.login = async (req, res) => {
-  const user = await User.findOne({ email: req.body.email });
-  if (!user) return res.status(400).json("User not found");
+  try {
+    const { email, password } = req.body;
 
-  const valid = await bcrypt.compare(req.body.password, user.password);
-  if (!valid) return res.status(400).json("Wrong password");
+    // check user
+    const user = await User.findOne({ email });
+    if (!user) {
+      return res.status(400).json("User not found");
+    }
 
-  const token = jwt.sign(
-    { id: user._id, role: user.role },
-    process.env.JWT_SECRET
-  );
+    // check password
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(400).json("Invalid password");
+    }
 
-  res.json({ token });
+    // 🔥 TOKEN GENERATE (IMPORTANT)
+    const token = jwt.sign(
+      { id: user._id, role: user.role || "user" },
+      process.env.JWT_SECRET,
+      { expiresIn: "1d" }
+    );
+
+    res.json({ token });
+
+  } catch (err) {
+    console.log("LOGIN ERROR:", err);
+    res.status(500).json(err.message);
+  }
 };
