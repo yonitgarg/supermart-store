@@ -1,30 +1,47 @@
+const User = require("../models/User");
+const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
+
+// REGISTER
+exports.register = async (req, res) => {
+  try {
+    const { name, email, password } = req.body;
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const user = new User({
+      name,
+      email,
+      password: hashedPassword
+    });
+
+    await user.save();
+
+    res.json("User registered");
+  } catch (err) {
+    res.status(500).json(err.message);
+  }
+};
+
+// LOGIN (🔥 THIS WAS MISSING / WRONG)
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
-    // check user
     const user = await User.findOne({ email });
-    if (!user) {
-      return res.status(400).json("User not found");
-    }
+    if (!user) return res.status(400).json("User not found");
 
-    // check password
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res.status(400).json("Invalid password");
-    }
+    if (!isMatch) return res.status(400).json("Wrong password");
 
-    // 🔥 TOKEN GENERATE (IMPORTANT)
     const token = jwt.sign(
-      { id: user._id, role: user.role || "user" },
+      { id: user._id },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
     res.json({ token });
-
   } catch (err) {
-    console.log("LOGIN ERROR:", err);
     res.status(500).json(err.message);
   }
 };
