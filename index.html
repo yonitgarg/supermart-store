@@ -2,187 +2,160 @@
 <html>
 <head>
   <title>Supermart</title>
-
   <style>
-    body {
-      font-family: Arial;
-      margin: 0;
-      background: #f8f8f8;
-    }
+    body { font-family: Arial; background:#f5f5f5; }
+    .container { text-align:center; margin-top:50px; }
+    input { margin:5px; padding:8px; }
+    button { padding:8px 15px; cursor:pointer; }
+    .hidden { display:none; }
 
-    header {
-      background: #00b386;
-      color: white;
-      padding: 15px;
-      text-align: center;
-      font-size: 22px;
-      font-weight: bold;
-    }
-
-    .container {
-      display: flex;
-    }
-
-    .products {
-      width: 70%;
-      padding: 20px;
-      display: grid;
-      grid-template-columns: repeat(3, 1fr);
-      gap: 15px;
-    }
-
+    .products { display:flex; flex-wrap:wrap; gap:10px; justify-content:center; }
     .card {
-      background: white;
-      padding: 10px;
-      border-radius: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      text-align: center;
-    }
-
-    .card img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
-      border-radius: 10px;
-    }
-
-    .card button {
-      margin-top: 5px;
-      padding: 5px 10px;
-      background: #00b386;
-      color: white;
-      border: none;
-      cursor: pointer;
-      border-radius: 5px;
-    }
-
-    .cart {
-      width: 30%;
-      background: white;
-      padding: 20px;
-      border-left: 2px solid #eee;
-    }
-
-    .cart-item {
-      display: flex;
-      justify-content: space-between;
-      margin: 10px 0;
-    }
-
-    .auth {
-      padding: 10px;
-      text-align: center;
-    }
-
-    input {
-      margin: 5px;
-      padding: 5px;
+      background:white; padding:10px; width:150px;
+      border-radius:10px; box-shadow:0 0 5px #ccc;
     }
   </style>
 </head>
 
 <body>
 
-<header>🛒 Supermart Store</header>
+<!-- AUTH -->
+<div id="auth" class="container">
+  <h2>Login / Register</h2>
 
-<div class="auth">
-  <input id="email" placeholder="Email">
-  <input id="password" placeholder="Password" type="password">
+  <input id="name" placeholder="Name"><br>
+  <input id="email" placeholder="Email"><br>
+  <input id="password" type="password" placeholder="Password"><br>
+
+  <button onclick="register()">Register</button>
   <button onclick="login()">Login</button>
 </div>
 
-<div class="container">
+<!-- ADMIN PANEL -->
+<div id="adminPanel" class="hidden container">
+  <h2>Admin Panel</h2>
+
+  <input id="pname" placeholder="Product Name"><br>
+  <input id="pprice" placeholder="Price"><br>
+
+  <button onclick="addProduct()">Add Product</button>
+  <button onclick="logout()">Logout</button>
+</div>
+
+<!-- USER SHOP -->
+<div id="shop" class="hidden">
+  <h2 style="text-align:center;">Products</h2>
 
   <div class="products" id="products"></div>
 
-  <div class="cart">
-    <h3>Cart</h3>
-    <div id="cart"></div>
-    <p>Total: ₹<span id="total">0</span></p>
-  </div>
+  <h3 style="text-align:center;">Cart</h3>
+  <div id="cart" style="text-align:center;"></div>
 
+  <button onclick="logout()">Logout</button>
 </div>
 
 <script>
 
-const API = "https://supermart-store.onrender.com/api/products";
-
-let cart = [];
+const BASE = "https://supermart-store.onrender.com/api";
 let token = "";
+let cart = [];
+let isAdmin = false;
+
+// REGISTER
+async function register() {
+  await fetch(BASE + "/auth/register", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      name: name.value,
+      email: email.value,
+      password: password.value
+    })
+  });
+
+  alert("Registered");
+}
 
 // LOGIN
 async function login() {
-  const email = document.getElementById("email").value;
-  const password = document.getElementById("password").value;
-
-  const res = await fetch("https://supermart-store.onrender.com/api/auth/login", {
-    method: "POST",
-    headers: {"Content-Type":"application/json"},
-    body: JSON.stringify({ email, password })
+  const res = await fetch(BASE + "/auth/login", {
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      email: email.value,
+      password: password.value
+    })
   });
 
   const data = await res.json();
   token = data.token;
 
-  alert("Login successful");
+  // decode role
+  const payload = JSON.parse(atob(token.split('.')[1]));
+  isAdmin = payload.role === "admin";
+
+  document.getElementById("auth").classList.add("hidden");
+
+  if(isAdmin) {
+    document.getElementById("adminPanel").classList.remove("hidden");
+  } else {
+    document.getElementById("shop").classList.remove("hidden");
+    loadProducts();
+  }
+}
+
+// ADD PRODUCT (ADMIN)
+async function addProduct() {
+  await fetch(BASE + "/products", {
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer " + token
+    },
+    body:JSON.stringify({
+      name: pname.value,
+      price: pprice.value
+    })
+  });
+
+  alert("Product added");
 }
 
 // LOAD PRODUCTS
 async function loadProducts() {
-  const res = await fetch(API);
+  const res = await fetch(BASE + "/products");
   const data = await res.json();
 
-  const container = document.getElementById("products");
-  container.innerHTML = "";
+  const div = document.getElementById("products");
+  div.innerHTML = "";
 
   data.forEach(p => {
-    const div = document.createElement("div");
-    div.className = "card";
-
-    div.innerHTML = `
-      <img src="https://via.placeholder.com/150">
-      <h4>${p.name}</h4>
-      <p>₹${p.price}</p>
-      <button onclick='addToCart(${JSON.stringify(p)})'>Add</button>
+    div.innerHTML += `
+      <div class="card">
+        <h4>${p.name}</h4>
+        <p>₹${p.price}</p>
+        <button onclick='addCart(${JSON.stringify(p)})'>Add</button>
+      </div>
     `;
-
-    container.appendChild(div);
   });
 }
 
 // CART
-function addToCart(p) {
+function addCart(p) {
   cart.push(p);
   renderCart();
 }
 
 function renderCart() {
-  const cartDiv = document.getElementById("cart");
-  cartDiv.innerHTML = "";
-
-  let total = 0;
-
-  cart.forEach((item, i) => {
-    total += item.price;
-
-    cartDiv.innerHTML += `
-      <div class="cart-item">
-        ${item.name}
-        <button onclick="remove(${i})">❌</button>
-      </div>
-    `;
-  });
-
-  document.getElementById("total").innerText = total;
+  let html = "";
+  cart.forEach(c => html += `<p>${c.name}</p>`);
+  document.getElementById("cart").innerHTML = html;
 }
 
-function remove(i) {
-  cart.splice(i,1);
-  renderCart();
+// LOGOUT
+function logout() {
+  location.reload();
 }
-
-// INIT
-loadProducts();
 
 </script>
 
