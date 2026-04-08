@@ -12,7 +12,7 @@ const register = async (req, res) => {
       name,
       email,
       password: hashedPassword,
-      role: "user"
+      role: "admin"
     });
 
     await user.save();
