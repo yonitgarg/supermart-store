@@ -6,8 +6,8 @@
   <style>
     body {
       font-family: Arial;
-      margin: 0;
       background: #f4f6f9;
+      margin: 0;
     }
 
     header {
@@ -19,13 +19,13 @@
     }
 
     .box {
-      width: 300px;
-      margin: 30px auto;
+      width: 320px;
+      margin: 40px auto;
       background: white;
       padding: 20px;
       border-radius: 10px;
-      box-shadow: 0 0 10px #ccc;
       text-align: center;
+      box-shadow: 0 0 10px #ccc;
     }
 
     input {
@@ -43,7 +43,13 @@
       cursor: pointer;
     }
 
-    .hidden { display:none; }
+    .link {
+      color: blue;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    .hidden { display: none; }
 
     .products {
       display: grid;
@@ -53,10 +59,10 @@
     }
 
     .card {
-      background:white;
-      padding:10px;
-      border-radius:10px;
-      text-align:center;
+      background: white;
+      padding: 10px;
+      border-radius: 10px;
+      text-align: center;
     }
   </style>
 </head>
@@ -67,11 +73,14 @@
 
 <!-- REGISTER -->
 <div id="registerBox" class="box">
-  <h3>Register (User)</h3>
+  <h3>Register</h3>
   <input id="rname" placeholder="Name"><br>
   <input id="remail" placeholder="Email"><br>
   <input id="rpass" type="password" placeholder="Password"><br>
+
   <button onclick="register()">Register</button>
+
+  <p class="link" onclick="showLogin()">Already have account? Login</p>
 </div>
 
 <!-- LOGIN -->
@@ -79,10 +88,13 @@
   <h3>Login</h3>
   <input id="lemail" placeholder="Email"><br>
   <input id="lpass" type="password" placeholder="Password"><br>
+
   <button onclick="login()">Login</button>
+
+  <p class="link" onclick="showRegister()">New user? Register</p>
 </div>
 
-<!-- ADMIN -->
+<!-- ADMIN PANEL -->
 <div id="adminPanel" class="hidden box">
   <h3>Admin Panel</h3>
   <input id="pname" placeholder="Product Name"><br>
@@ -90,7 +102,7 @@
   <button onclick="addProduct()">Add Product</button>
 </div>
 
-<!-- USER SHOP -->
+<!-- SHOP -->
 <div id="shop" class="hidden">
   <h2 style="text-align:center;">Products</h2>
   <div class="products" id="products"></div>
@@ -101,7 +113,18 @@
 const BASE = "https://supermart-store.onrender.com/api";
 let token = "";
 
-// REGISTER (USER ONLY)
+// SWITCH UI
+function showLogin() {
+  registerBox.classList.add("hidden");
+  loginBox.classList.remove("hidden");
+}
+
+function showRegister() {
+  loginBox.classList.add("hidden");
+  registerBox.classList.remove("hidden");
+}
+
+// REGISTER
 async function register() {
   await fetch(BASE+"/auth/register", {
     method:"POST",
@@ -114,9 +137,7 @@ async function register() {
   });
 
   alert("Registered! Now login");
-
-  registerBox.classList.add("hidden");
-  loginBox.classList.remove("hidden");
+  showLogin(); // 🔥 auto switch
 }
 
 // LOGIN
@@ -162,7 +183,7 @@ async function loadProducts() {
   });
 }
 
-// ADD PRODUCT (ADMIN)
+// ADD PRODUCT
 async function addProduct() {
   await fetch(BASE+"/products", {
     method:"POST",
