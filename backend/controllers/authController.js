@@ -16,7 +16,7 @@ const register = async (req, res) => {
     });
 
     await user.save();
-    res.json("User registered");
+    res.json("Admin registered");
 
   } catch (err) {
     res.status(500).json(err.message);
