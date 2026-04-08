@@ -142,30 +142,48 @@ async function register() {
 
 // LOGIN
 async function login() {
-  const res = await fetch(BASE+"/auth/login", {
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      email:lemail.value,
-      password:lpass.value
-    })
-  });
+  try {
+    const res = await fetch(BASE+"/auth/login", {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify({
+        email:lemail.value,
+        password:lpass.value
+      })
+    });
 
-  const data = await res.json();
-  token = data.token;
+    const data = await res.json();
+    console.log("LOGIN RESPONSE:", data);
 
-  const payload = JSON.parse(atob(token.split('.')[1]));
+    if (!res.ok) {
+      alert(data); // ❌ login fail
+      return;
+    }
 
-  loginBox.classList.add("hidden");
+    if (!data.token) {
+      alert("Token missing");
+      return;
+    }
 
-  if(payload.role === "admin") {
-    adminPanel.classList.remove("hidden");
-  } else {
-    shop.classList.remove("hidden");
-    loadProducts();
+    token = data.token;
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    console.log("PAYLOAD:", payload);
+
+    loginBox.classList.add("hidden");
+
+    if(payload.role === "admin") {
+      adminPanel.classList.remove("hidden");
+    } else {
+      shop.classList.remove("hidden");
+      loadProducts();
+    }
+
+  } catch (err) {
+    console.error(err);
+    alert("Server error");
   }
 }
-
 // LOAD PRODUCTS
 async function loadProducts() {
   const res = await fetch(BASE+"/products");
