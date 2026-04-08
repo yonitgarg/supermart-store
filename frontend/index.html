@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Supermart</title>
+</head>
+<body>
+
+<h2>Products</h2>
+<button onclick="loadProducts()">Load Products</button>
+
+<ul id="list"></ul>
+
+<script>
+const API = "https://supermart-store.onrender.com/api/products";
+
+async function loadProducts() {
+  const res = await fetch(API);
+  const data = await res.json();
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+
+  data.forEach(p => {
+    const li = document.createElement("li");
+    li.innerText = p.name + " - ₹" + p.price;
+    list.appendChild(li);
+  });
+}
+</script>
+
+</body>
+</html>
