@@ -1,138 +1,224 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Supermart</title>
+  <title>Supermart Pro+</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
     body {
-      margin: 0;
-      font-family: Arial;
-      background: #f5f5f5;
+      margin:0;
+      font-family: 'Segoe UI';
+      background:#f8f9fa;
+      display:flex;
+    }
+
+    /* SIDEBAR */
+    .sidebar {
+      width:220px;
+      background:#111;
+      color:white;
+      height:100vh;
+      padding:20px;
+    }
+
+    .menu div {
+      margin:15px 0;
+      cursor:pointer;
+    }
+
+    .menu div:hover {
+      color:#0aad0a;
+    }
+
+    /* MAIN */
+    .main {
+      flex:1;
     }
 
     /* NAVBAR */
     .navbar {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      background: #0aad0a;
-      color: white;
-      padding: 15px;
+      background:#0aad0a;
+      color:white;
+      padding:15px;
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      position:sticky;
+      top:0;
     }
 
-    .cart {
-      cursor: pointer;
-      font-size: 18px;
+    .search {
+      padding:5px;
+      width:200px;
     }
 
-    /* AUTH BOX */
-    .box {
-      width: 300px;
-      margin: 40px auto;
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      text-align: center;
-    }
-
-    input {
-      width: 90%;
-      padding: 8px;
-      margin: 5px;
-    }
-
-    button {
-      background: #0aad0a;
-      color: white;
-      border: none;
-      padding: 8px;
-      margin-top: 10px;
-      cursor: pointer;
-    }
-
-    .hidden { display: none; }
-
-    /* PRODUCTS GRID */
+    /* PRODUCTS */
     .products {
-      display: grid;
-      grid-template-columns: repeat(4,1fr);
-      gap: 15px;
-      padding: 20px;
+      display:grid;
+      grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+      gap:15px;
+      padding:20px;
     }
 
     .card {
-      background: white;
-      padding: 15px;
-      border-radius: 10px;
-      text-align: center;
-      transition: 0.2s;
+      background:white;
+      padding:10px;
+      border-radius:12px;
+      text-align:center;
+      box-shadow:0 2px 10px rgba(0,0,0,0.1);
+      transition:0.2s;
     }
 
     .card:hover {
-      transform: scale(1.03);
+      transform:translateY(-5px);
     }
 
     img {
-      width: 100%;
-      height: 120px;
-      object-fit: cover;
+      width:100%;
+      height:140px;
+      object-fit:cover;
+      border-radius:10px;
     }
 
     .price {
-      color: green;
-      font-weight: bold;
+      color:#0aad0a;
+      font-weight:bold;
     }
 
-    .cartBox {
-      position: fixed;
-      right: 0;
-      top: 0;
-      width: 300px;
-      height: 100%;
-      background: white;
-      padding: 10px;
-      box-shadow: -2px 0 10px gray;
-      display: none;
+    button {
+      background:#0aad0a;
+      color:white;
+      border:none;
+      padding:6px 10px;
+      margin-top:5px;
+      border-radius:5px;
+      cursor:pointer;
     }
+
+    /* CART DRAWER */
+    .cartDrawer {
+      position:fixed;
+      right:-350px;
+      top:0;
+      width:300px;
+      height:100%;
+      background:white;
+      box-shadow:-2px 0 10px gray;
+      padding:15px;
+      transition:0.3s;
+    }
+
+    .cartDrawer.open {
+      right:0;
+    }
+
+    /* AUTH */
+    .box {
+      width:300px;
+      background:white;
+      padding:20px;
+      margin:20px;
+      border-radius:10px;
+    }
+
+    input {
+      width:90%;
+      padding:8px;
+      margin:5px;
+    }
+
+    .hidden {
+      display:none;
+    }
+
   </style>
 </head>
 
 <body>
 
-<!-- NAVBAR -->
-<div class="navbar">
+<!-- SIDEBAR -->
+<div class="sidebar">
   <h2>🛒 Supermart</h2>
-  <div class="cart" onclick="toggleCart()">🛍 Cart (<span id="count">0</span>)</div>
+  <div class="menu">
+    <div onclick="showPage('home')">🏠 Home</div>
+    <div onclick="showPage('login')">🔑 Login</div>
+    <div onclick="showPage('register')">📝 Register</div>
+    <div onclick="toggleCart()">🛍 Cart</div>
+    <div onclick="showPage('admin')">⚙ Admin</div>
+  </div>
 </div>
 
-<!-- LOGIN -->
-<div id="loginBox" class="box">
-  <h3>Login</h3>
-  <input id="lemail" placeholder="Email"><br>
-  <input id="lpass" type="password" placeholder="Password"><br>
-  <button onclick="login()">Login</button>
-</div>
+<!-- MAIN -->
+<div class="main">
 
-<!-- PRODUCTS -->
-<div id="shop" class="hidden">
-  <div class="products" id="products"></div>
+  <div class="navbar">
+    <h3>Supermart Pro+</h3>
+    <input class="search" placeholder="Search..." onkeyup="searchProduct(this.value)">
+    <div onclick="toggleCart()">🛒 <span id="count">0</span></div>
+  </div>
+
+  <!-- HOME -->
+  <div id="homePage">
+    <div class="products" id="products"></div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginPage" class="hidden box">
+    <h3>Login</h3>
+    <input id="lemail" placeholder="Email"><br>
+    <input id="lpass" type="password" placeholder="Password"><br>
+    <button onclick="login()">Login</button>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerPage" class="hidden box">
+    <h3>Register</h3>
+    <input id="rname" placeholder="Name"><br>
+    <input id="remail" placeholder="Email"><br>
+    <input id="rpass" type="password" placeholder="Password"><br>
+    <button onclick="register()">Register</button>
+  </div>
+
+  <!-- ADMIN -->
+  <div id="adminPage" class="hidden box">
+    <h3>Admin Panel</h3>
+    <input id="pname" placeholder="Product Name"><br>
+    <input id="pprice" placeholder="Price"><br>
+    <button onclick="addProduct()">Add Product</button>
+  </div>
+
 </div>
 
 <!-- CART -->
-<div id="cartBox" class="cartBox">
-  <h3>Cart</h3>
-  <ul id="cartItems"></ul>
+<div id="cartDrawer" class="cartDrawer">
+  <h3>Your Cart</h3>
+  <div id="cartItems"></div>
+  <h4>Total: ₹<span id="total">0</span></h4>
 </div>
 
 <script>
 
 const BASE = "https://supermart-store.onrender.com/api";
-let token = "";
 let cart = [];
+let token = "";
+let allProducts = [];
+
+// PAGE SWITCH
+function showPage(p){
+  homePage.classList.add("hidden");
+  loginPage.classList.add("hidden");
+  registerPage.classList.add("hidden");
+  adminPage.classList.add("hidden");
+
+  if(p==="home") homePage.classList.remove("hidden");
+  if(p==="login") loginPage.classList.remove("hidden");
+  if(p==="register") registerPage.classList.remove("hidden");
+  if(p==="admin") adminPage.classList.remove("hidden");
+}
 
 // LOGIN
-async function login() {
-  const res = await fetch(BASE+"/auth/login", {
+async function login(){
+  const res = await fetch(BASE+"/auth/login",{
     method:"POST",
     headers:{"Content-Type":"application/json"},
     body:JSON.stringify({
@@ -142,60 +228,126 @@ async function login() {
   });
 
   const data = await res.json();
-
-  if (!data.token) {
-    alert("Login failed");
-    return;
-  }
+  if(!data.token) return alert("Login failed");
 
   token = data.token;
 
-  loginBox.classList.add("hidden");
-  shop.classList.remove("hidden");
+  const payload = JSON.parse(atob(token.split('.')[1]));
+
+  if(payload.role==="admin"){
+    showPage("admin");
+  } else {
+    showPage("home");
+  }
 
   loadProducts();
 }
 
+// REGISTER
+async function register(){
+  await fetch(BASE+"/auth/register",{
+    method:"POST",
+    headers:{"Content-Type":"application/json"},
+    body:JSON.stringify({
+      name:rname.value,
+      email:remail.value,
+      password:rpass.value
+    })
+  });
+
+  alert("Registered!");
+  showPage("login");
+}
+
 // LOAD PRODUCTS
-async function loadProducts() {
+async function loadProducts(){
   const res = await fetch(BASE+"/products");
   const data = await res.json();
 
-  products.innerHTML = "";
+  allProducts = data;
+  displayProducts(data);
+}
 
-  data.forEach(p => {
-    products.innerHTML += `
+// DISPLAY
+function displayProducts(data){
+  products.innerHTML="";
+
+  data.forEach(p=>{
+    products.innerHTML+=`
       <div class="card">
-        <img src="https://via.placeholder.com/150">
+        <img src="https://picsum.photos/200?random=${p._id}">
         <h4>${p.name}</h4>
         <p class="price">₹${p.price}</p>
-        <button onclick='addToCart(${JSON.stringify(p)})'>Add to Cart</button>
+        <button onclick='addToCart(${JSON.stringify(p)})'>Add</button>
       </div>
     `;
   });
 }
 
-// ADD TO CART
-function addToCart(p) {
-  cart.push(p);
-  document.getElementById("count").innerText = cart.length;
-
-  renderCart();
+// SEARCH
+function searchProduct(q){
+  const filtered = allProducts.filter(p=>p.name.toLowerCase().includes(q.toLowerCase()));
+  displayProducts(filtered);
 }
 
-// SHOW CART
-function toggleCart() {
-  cartBox.style.display = cartBox.style.display === "block" ? "none" : "block";
+// CART
+function addToCart(p){
+  const exist = cart.find(i=>i._id===p._id);
+  if(exist) exist.qty++;
+  else cart.push({...p,qty:1});
+
+  updateCart();
 }
 
-// RENDER CART
-function renderCart() {
-  cartItems.innerHTML = "";
+function updateCart(){
+  count.innerText = cart.length;
+  cartItems.innerHTML="";
+  let totalPrice=0;
 
-  cart.forEach(item => {
-    cartItems.innerHTML += `<li>${item.name} - ₹${item.price}</li>`;
+  cart.forEach(i=>{
+    totalPrice += i.price*i.qty;
+    cartItems.innerHTML+=`
+      <div>
+        ${i.name} x ${i.qty}
+        <button onclick="removeItem('${i._id}')">❌</button>
+      </div>
+    `;
   });
+
+  total.innerText = totalPrice;
 }
+
+function removeItem(id){
+  cart = cart.filter(i=>i._id!==id);
+  updateCart();
+}
+
+// CART TOGGLE
+function toggleCart(){
+  cartDrawer.classList.toggle("open");
+}
+
+// ADD PRODUCT
+async function addProduct(){
+  await fetch(BASE+"/products",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json",
+      "Authorization":"Bearer "+token
+    },
+    body:JSON.stringify({
+      name:pname.value,
+      price:pprice.value
+    })
+  });
+
+  alert("Added!");
+  loadProducts();
+}
+
+// INIT
+showPage("home");
+loadProducts();
 
 </script>
 
