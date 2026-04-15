@@ -181,12 +181,13 @@
 
   <!-- ADMIN -->
   <div id="adminPage" class="hidden box">
-    <h3>Admin Panel</h3>
-    <input id="pname" placeholder="Product Name"><br>
-    <input id="pprice" placeholder="Price"><br>
-    <button onclick="addProduct()">Add Product</button>
-  </div>
+  <h3>Admin Panel</h3>
 
+  <input id="pname" placeholder="Product Name"><br>
+  <input id="pprice" placeholder="Price"><br>
+  <input id="pimage" placeholder="Image URL"><br>   <!-- 🔥 NEW -->
+
+  <button onclick="addProduct()">Add Product</button>
 </div>
 
 <!-- CART -->
@@ -280,7 +281,7 @@ function displayProducts(data){
   data.forEach(p=>{
     products.innerHTML+=`
       <div class="card">
-        <img src="https://picsum.photos/200?random=${p._id}">
+        <img src="${p.image || 'https://via.placeholder.com/150'}">
         <h4>${p.name}</h4>
         <p class="price">₹${p.price}</p>
         <button onclick='addToCart(${JSON.stringify(p)})'>Add</button>
@@ -362,28 +363,13 @@ async function addProduct(){
     },
     body:JSON.stringify({
       name:pname.value,
-      price:pprice.value
+      price:pprice.value,
+      image:pimage.value   // 🔥 NEW
     })
   });
 
   alert("Added!");
   loadProducts();
-}
-async function register(){
-  const res = await fetch(BASE+"/auth/register",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      name:rname.value,
-      email:remail.value,
-      password:rpass.value
-    })
-  });
-
-  const data = await res.json();
-
-  alert(data || "Registered!");
-  showPage("login");
 }
 
 // INIT
