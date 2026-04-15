@@ -27,7 +27,7 @@
     }
 
     .menu div:hover {
-      color:#0aad0a;
+      color:#d4e0d4;
     }
 
     /* MAIN */
@@ -37,7 +37,7 @@
 
     /* NAVBAR */
     .navbar {
-      background:#0aad0a;
+      background:#cad2ca;
       color:white;
       padding:15px;
       display:flex;
@@ -144,7 +144,7 @@
     <div onclick="showPage('login')">🔑 Login</div>
     <div onclick="showPage('register')">📝 Register</div>
     <div onclick="toggleCart()">🛍 Cart</div>
-    <div onclick="showPage('admin')">⚙ Admin</div>
+    <div id="adminMenu" onclick="showPage('admin')" style="display:none;">⚙ Admin</div>
   </div>
 </div>
 
@@ -152,7 +152,7 @@
 <div class="main">
 
   <div class="navbar">
-    <h3>Supermart Pro+</h3>
+    <h3>Supermart </h3>
     <input class="search" placeholder="Search..." onkeyup="searchProduct(this.value)">
     <div onclick="toggleCart()">🛒 <span id="count">0</span></div>
   </div>
@@ -205,6 +205,22 @@ let allProducts = [];
 
 // PAGE SWITCH
 function showPage(p){
+
+  // 🔐 ADMIN CHECK
+  if(p === "admin"){
+    if(!token){
+      alert("Login first");
+      return;
+    }
+
+    const payload = JSON.parse(atob(token.split('.')[1]));
+
+    if(payload.role !== "admin"){
+      alert("Access Denied");
+      return;
+    }
+  }
+
   homePage.classList.add("hidden");
   loginPage.classList.add("hidden");
   registerPage.classList.add("hidden");
@@ -228,35 +244,24 @@ async function login(){
   });
 
   const data = await res.json();
-  if(!data.token) return alert("Login failed");
+
+  if(!data.token){
+    alert("Login failed");
+    return;
+  }
 
   token = data.token;
 
   const payload = JSON.parse(atob(token.split('.')[1]));
 
   if(payload.role==="admin"){
+    document.getElementById("adminMenu").style.display = "block";
     showPage("admin");
   } else {
     showPage("home");
   }
 
   loadProducts();
-}
-
-// REGISTER
-async function register(){
-  await fetch(BASE+"/auth/register",{
-    method:"POST",
-    headers:{"Content-Type":"application/json"},
-    body:JSON.stringify({
-      name:rname.value,
-      email:remail.value,
-      password:rpass.value
-    })
-  });
-
-  alert("Registered!");
-  showPage("login");
 }
 
 // LOAD PRODUCTS
@@ -320,6 +325,26 @@ function updateCart(){
 function removeItem(id){
   cart = cart.filter(i=>i._id!==id);
   updateCart();
+}
+function showPage(p){
+
+  if(p === "admin"){
+    const payload = JSON.parse(atob(token.split('.')[1]));
+    if(payload.role !== "admin"){
+      alert("Access Denied");
+      return;
+    }
+  }
+
+  homePage.classList.add("hidden");
+  loginPage.classList.add("hidden");
+  registerPage.classList.add("hidden");
+  adminPage.classList.add("hidden");
+
+  if(p==="home") homePage.classList.remove("hidden");
+  if(p==="login") loginPage.classList.remove("hidden");
+  if(p==="register") registerPage.classList.remove("hidden");
+  if(p==="admin") adminPage.classList.remove("hidden");
 }
 
 // CART TOGGLE
