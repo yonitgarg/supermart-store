@@ -161,6 +161,8 @@
   <div id="homePage">
     <div class="products" id="products"></div>
   </div>
+  <!--Logout-->
+  <button onclick="logout()">Logout</button>
 
   <!-- LOGIN -->
   <div id="loginPage" class="hidden box">
@@ -370,6 +372,42 @@ async function addProduct(){
 
   alert("Added!");
   loadProducts();
+}
+// register 
+async function register(){
+  const res = await fetch(BASE+"/auth/register",{
+    method:"POST",
+    headers:{
+      "Content-Type":"application/json"
+    },
+    body:JSON.stringify({
+      name: document.getElementById("rname").value,
+      email: document.getElementById("remail").value,
+      password: document.getElementById("rpass").value
+    })
+  });
+
+  const data = await res.json();
+
+  if(res.status !== 200){
+    alert(data);
+    return;
+  }
+
+  alert("Registered Successfully ✅");
+  showPage("login");
+}
+
+// LOGOUT
+function logout(){
+  token = "";
+  cart = [];
+
+  alert("Logged out");
+
+  document.getElementById("adminMenu").style.display = "none";
+
+  showPage("login");
 }
 
 // INIT
